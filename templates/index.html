@@ -5,6 +5,12 @@
   <body>
     <h1 align="center">This Wine Does Not Exist</h1> 
     <hr>
+    <button onclick="myFunction()">Reload page for new result!</button>
+    <script>
+    function myFunction() {
+      location.reload();
+      }
+    </script>
     <h3 align="center"> {{ w_name }}</h3>
     <h4 align="center"> ${{ w_price }}</h4>
     <p align="center">{{ w_description }} </p>
