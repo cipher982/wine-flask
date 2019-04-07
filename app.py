@@ -7,7 +7,8 @@ app = Flask(__name__)
 @app.route('/')
 @app.route('/wine')
 def main():
-	df = pd.read_csv('static/fakes.csv', sep='|')
+	df = pd.read_csv('static/fake_wines_old.csv', sep='|')
+	print(df.head())
 	wine_ix = random.randint(0,len(df))
 	wine_name = df.iloc[wine_ix,:]['name']
 	wine_description = df.iloc[wine_ix,:]['description']
