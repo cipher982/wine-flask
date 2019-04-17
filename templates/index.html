@@ -1,56 +1,32 @@
-<!DOCTYPE html>
 <html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-* {
-  box-sizing: border-box;
-}
+  <head>
 
-.row {
-  display: flex;
-}
-
-/* Create two equal columns that sits next to each other */
-.column {
-  flex: 50%;
-  padding: 10px;
-  height: 300px; /* Should be removed. Only for demonstration */
-}
-</style>
-</head>
-<body>
-
-<h1 align="center">This Wine Does Not Exist</h2>
-<hr>
+  </head>
+  <body>
+    <h1 align="center">This Wine Does Not Exist</h1> 
+    <hr>
     <button onclick="myFunction()">Reload page for new result!</button>
     <script>
     function myFunction() {
       location.reload();
       }
     </script>
-    <h3 align="center"> {{ w_name }} </h3>
+    <h3 align="center"> {{ w_name }}</h3>
     <h4 align="center"> ${{ w_price }}</h4>
 
-<div class="row">
-  <div class="column">
-     <img src="https://www.thiswinedoesnotexist.com/static/labels_on_bottle/wine_bottle_00547.png" align="center"  >
-  </div>
-  <div class="column" >
-    <h2 align="center">Description</h2>
-    <p>{{ w_description }}</p>
-  </div>
-</div>
+  <img src="{{ w_image }}" align="center"  >
 
-</body>
-<footer>
+  <p align="center">{{ w_description }} </p>
+
+  </body>
+  <footer>
     <p>Created by: David Rose</p>
     <p>Created with: Python, Tensorflow/Keras, Flask, Render</p>
     <p>
-        <li><b>Name:</b> (Keras) Character embedding layer, LSTM x 2, Dense ASCII output</li>
-        <li><b>Description:</b>(Keras) Character embedding layer, LSTM x 2, Dense ASCII output</li>
-        <li><b>Price:</b>(Keras) Character embedding layer, Convolution, Pooling, Dense 100, Dense 1 regression output</li>
-        <li><b>Label:</b>(TensorFlow) NVIDIA StyleGAN with tweaks</li>
+      <li><b>Name:</b> (Keras) Character embedding layer, LSTM x 2, Dense ASCII output</li>
+      <li><b>Description:</b>(Keras) Character embedding layer, LSTM x 2, Dense ASCII output</li>
+      <li><b>Price:</b>(Keras) Character embedding layer, Convolution, Pooling, Dense 100, Dense 1 regression output</li>
+      <li><b>Label:</b>(TensorFlow) NVIDIA StyleGAN with tweaks</li>
     </p>
     <p>GitHub Models Link: <a href="https://github.com/cipher982/this-wine-does-not-exist">
       https://github.com/cipher982/this-wine-does-not-exist</a></p>
@@ -58,4 +34,5 @@
       https://github.com/cipher982/wine-flask</a></p>
 
   </footer> 
+
 </html>
