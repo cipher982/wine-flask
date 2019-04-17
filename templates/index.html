@@ -13,9 +13,10 @@
     </script>
     <h3 align="center"> {{ w_name }}</h3>
     <h4 align="center"> ${{ w_price }}</h4>
-    <p align="center">{{ w_description }} </p>
 
-  <img src="{{url_for('static', filename='wine_diagram_1.png')}}" />
+  <img src="{{ w_image }}" />
+
+  <p align="center">{{ w_description }} </p>
 
   </body>
   <footer>
