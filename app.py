@@ -15,7 +15,7 @@ def main():
 	wine_name = df.iloc[wine_ix,:]['name']
 	wine_description = df.iloc[wine_ix,:]['description']
 	wine_price = df.iloc[wine_ix,:]['price']
-	wine_label_paths = os.listdir("static/labels_on_bottle/" )
+	wine_label_paths = listdir("static/labels_on_bottle/" )
 	wine_image = random.choice(wine_label_paths)
 
 	return render_template('index.html', 
