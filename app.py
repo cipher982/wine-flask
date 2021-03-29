@@ -30,7 +30,7 @@ def main():
 
 	return render_template(
 		'index.html',
-        w_name = wine_name,
+		w_name = wine_name,
         w_description = wine_description,
 		w_price = wine_price,
 		w_image = image_path
