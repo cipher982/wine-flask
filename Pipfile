@@ -7,6 +7,7 @@ name = "pypi"
 gunicorn = "*"
 pandas = "*"
 Flask = "*"
+pickle5 = "*"
 
 [dev-packages]
 

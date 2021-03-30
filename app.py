@@ -2,6 +2,8 @@ import logging
 from os import listdir, path
 import random
 
+import pickle5 as pickle
+
 from flask import Flask, render_template
 import pandas as pd
 
@@ -17,7 +19,8 @@ image_dir = "https://storage.googleapis.com/wine-flask/labels_on_bottle/"
 def main():
 	logging.info("Starting request in main()")
 	dataset_path = path.join(dataset_dir, "fake_name_desc_price.pkl")
-	dataset = pd.read_pickle(dataset_path)
+	with open(dataset_path,  "rb") as f:
+		dataset = pickle.load(f)
 	wine_ix = random.randint(0,len(dataset))
 	wine_name = dataset.iloc[wine_ix,:]['name']
 	wine_description = dataset.iloc[wine_ix,:]['description']
