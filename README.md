@@ -1,4 +1,4 @@
-# wine-flask
-This is the repo for hosting the outputs created by the other repo: this-wine-does-not-exist. Uses Flask and Render
+# Wine-Flask
+## Flask & Gunicorn server for hosting results from https://github.com/cipher982/this-wine-does-not-exist
 
-See the main repo for how this was created at: https://github.com/cipher982/this-wine-does-not-exist.
+The linked repository above contains all the code and notebooks for building the dataset of wines, training the various models, and producing the results. This repository is built around providing a web server built around Python that allows the work to be presented on a wider scale. 
