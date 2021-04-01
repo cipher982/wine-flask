@@ -40,7 +40,7 @@ def main():
     LOG.info(f"Sampled random wine {random_filename}")
 
     # Combine with full path
-    image_path = Path(image_dir, random_filename)
+    image_path = image_dir + random_filename
     LOG.info(f"Returning image path {image_path}")
 
     return render_template(
