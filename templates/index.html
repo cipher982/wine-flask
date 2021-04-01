@@ -16,8 +16,11 @@
       location.reload();
       }
     </script>
-    <h3 align="center"> {{ w_name }}</h3>
-    <h4 align="center"> ${{ w_price }}</h4>
+    <h2 align="center"> {{ w_name }}</h3>
+    <!-- <h4 align="center"> ${{ w_price }}</h4> -->
+    <h3 align="center"> <b>Category:</b> {{ w_category_2 }} ({{ w_category_1 }})</h4>
+    <h3 align="center"> <b>Origin:</b> {{ w_origin }}</h4>
+
 
   <p style="text-align:center;"><img src="{{ w_image }}" alt="Fake Bottle"></p>
 
@@ -28,11 +31,11 @@
   </body>
   <footer>
     <p>Created by: David Rose</p>
-    <p>Created with: Python, Tensorflow/Keras, Flask, Render</p>
+    <p>Created with: Python, Tensorflow, PyTorch, Flask, Gunicorn</p>
     <p>
-      <li><b>Name:</b> (Keras) Character embedding layer, LSTM x 2, Dense ASCII output</li>
-      <li><b>Description:</b>(Keras) Character embedding layer, LSTM x 2, Dense ASCII output</li>
-      <li><b>Price:</b>(Keras) Character embedding layer, Convolution, Pooling, Dense 100, Dense 1 regression output</li>
+      <li><b>Name:</b> (TensorFlow) Character embedding layer, LSTM x 2, Dense ASCII output</li>
+      <li><b>Description:</b>(PyTorch) GPT2-XL 1.5b parameters, trained on 130,000 samples</li>
+      <!-- <li><b>Price:</b>(Keras) Character embedding layer, Convolution, Pooling, Dense 100, Dense 1 regression output</li> -->
       <li><b>Label:</b>(TensorFlow) NVIDIA StyleGAN with tweaks</li>
     </p>
     <p>GitHub Models Link: <a href="https://github.com/cipher982/this-wine-does-not-exist">

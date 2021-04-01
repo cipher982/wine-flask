@@ -8,6 +8,7 @@ gunicorn = "*"
 pandas = "*"
 Flask = "*"
 pickle5 = "*"
+autopep8 = "*"
 
 [dev-packages]
 
