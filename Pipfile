@@ -5,10 +5,11 @@ name = "pypi"
 
 [packages]
 gunicorn = "*"
-pandas = "*"
 Flask = "*"
 pickle5 = "*"
 autopep8 = "*"
+google-cloud-datastore = "*"
+firebase-admin = "*"
 
 [dev-packages]
 
