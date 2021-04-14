@@ -10,6 +10,7 @@ pickle5 = "*"
 autopep8 = "*"
 google-cloud-datastore = "*"
 firebase-admin = "*"
+google-auth = "*"
 
 [dev-packages]
 
