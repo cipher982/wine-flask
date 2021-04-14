@@ -10,7 +10,7 @@ from google.oauth2 import service_account
 
 # Set constants
 GCLOUD_BUCKET = 'wine-flask'
-LABELS_BLOB = "labels_on_bottle_v2"
+LABELS_BLOB = "labels_on_bottle_v2/bottle_cat_"
 DATASET_DIR = f"https://storage.googleapis.com/{GCLOUD_BUCKET}/descriptions/"
 IMAGE_DIR = f"https://storage.googleapis.com/{GCLOUD_BUCKET}/"
 FIRESTORE_COLLECTION = "gpt2-xl-outputs"
