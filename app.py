@@ -25,7 +25,7 @@ store = firestore.client()
 
 # Set paths
 dataset_dir = "https://storage.googleapis.com/wine-flask/descriptions/"
-image_dir = "https://storage.googleapis.com/wine-flask/labels_on_bottle_v2/"
+image_dir = "https://storage.googleapis.com/wine-flask/labels_on_bottle/"
 
 def sample_from_firestore(return_random=True, doc_id=None):
     LOG.info("Starting firestore sample")
