@@ -7,6 +7,7 @@ from firebase_admin import credentials, firestore, initialize_app
 from flask import Flask, render_template
 from google.cloud import storage
 from google.oauth2 import service_account
+from retry import retry
 
 # Set constants
 GCLOUD_BUCKET = 'wine-flask'
@@ -78,6 +79,7 @@ def sample_label_from_gcs():
 
 @app.route('/')
 @app.route('/wine')
+@retry((Exception), tries=5, delay=0, backoff=0)
 def main():
     LOG.info("Starting request")
     
@@ -87,12 +89,14 @@ def main():
     LOG.info(f"Returning image path: {image_path}")
 
     # Sample random description matching the label category
-    wine = sample_from_firestore(return_random=True, label_cat_2=label_cat_2)
-    wine_name = wine['name']
-    wine_category_1 = wine['category_1']
-    wine_category_2 = wine['category_2']
-    wine_origin = wine['origin']
-    wine_description = wine['description']
+    wine_description = None
+    while wine_description == None:
+        wine = sample_from_firestore(return_random=True, label_cat_2=label_cat_2)
+        wine_name = wine['name']
+        wine_category_1 = wine['category_1']
+        wine_category_2 = wine['category_2']
+        wine_origin = wine['origin']
+        wine_description = wine['description']
     LOG.info(f"Returning description for: {wine_name}")
 
     return render_template(
