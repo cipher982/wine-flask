@@ -4,7 +4,7 @@ import random
 import sys
 
 from firebase_admin import credentials, firestore, initialize_app
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 from google.cloud import storage
 from google.oauth2 import service_account
 from retry import retry
@@ -47,9 +47,7 @@ firestore_app = initialize_app(firestore_creds)
 store = firestore.client()
 
 # Initialize google.cloud client
-gcloud_creds = service_account.Credentials.from_service_account_file(
-    environ["GOOGLE_APPLICATION_CREDENTIALS"]
-)
+gcloud_creds = service_account.Credentials.from_service_account_file(environ["GOOGLE_APPLICATION_CREDENTIALS"])
 
 # Create list of bottles from gcloud blob
 storage_client = storage.Client(credentials=gcloud_creds)
@@ -70,10 +68,7 @@ def sample_from_firestore(return_random=True, label_cat_2=None, doc_id=None):
         )
     else:
         result = (
-            store.collection(FIRESTORE_COLLECTION)
-            .where("category_2", "==", CAT_2_DICT[label_cat_2])
-            .limit(1)
-            .get()[0]
+            store.collection(FIRESTORE_COLLECTION).where("category_2", "==", CAT_2_DICT[label_cat_2]).limit(1).get()[0]
         )
 
     LOG.info(f"Returning firestore sample: {result}")
@@ -82,6 +77,14 @@ def sample_from_firestore(return_random=True, label_cat_2=None, doc_id=None):
 
 def sample_label_from_gcs():
     return random.choice(blobs)
+
+
+# openapi plugin
+@app.route("/.well-known/ai-plugin.json")
+def get_stuff():
+    with open("./.well-known/ai-plugin.json", "r") as f:
+        data = f.read()
+    return jsonify(data)
 
 
 @app.route("/")

@@ -6,3 +6,4 @@ __pycache__
 .keys/
 .env
 .DS_STORE
+.flake8
