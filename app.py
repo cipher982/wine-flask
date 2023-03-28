@@ -88,12 +88,6 @@ def get_stuff():
     return jsonify(data)
 
 
-def get_stuff():
-    with open("path/to/your/stuff.json", "r") as f:
-        data = json.load(f)
-    return jsonify(data)
-
-
 @app.route("/")
 @app.route("/wine")
 @retry((Exception), tries=5, delay=0, backoff=0)
