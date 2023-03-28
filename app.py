@@ -1,3 +1,4 @@
+import json
 import logging
 from os import environ
 import random
@@ -83,7 +84,13 @@ def sample_label_from_gcs():
 @app.route("/.well-known/ai-plugin.json")
 def get_stuff():
     with open("./.well-known/ai-plugin.json", "r") as f:
-        data = f.read()
+        data = json.load(f)
+    return jsonify(data)
+
+
+def get_stuff():
+    with open("path/to/your/stuff.json", "r") as f:
+        data = json.load(f)
     return jsonify(data)
 
 
@@ -100,7 +107,7 @@ def main():
 
     # Sample random description matching the label category
     wine_description = None
-    while wine_description == None:
+    while wine_description is None:
         wine = sample_from_firestore(return_random=True, label_cat_2=label_cat_2)
         wine_name = wine["name"]
         wine_category_1 = wine["category_1"]
