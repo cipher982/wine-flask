@@ -5,3 +5,4 @@ __pycache__
 .ipynb_checkpoints/Untitled-checkpoint.ipynb
 .keys/
 .env
+.DS_STORE

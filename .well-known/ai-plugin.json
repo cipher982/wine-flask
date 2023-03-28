@@ -1,0 +1,18 @@
+{
+    "schema_version": "v1",
+    "name_for_human": "Wine Plugin",
+    "name_for_model": "wine",
+    "description_for_human": "Plugin for creating and generating custom wines.",
+    "description_for_model": "Plugin for creating and generating custom wines.",
+    "auth": {
+      "type": "none"
+    },
+    "api": {
+      "type": "openapi",
+      "url": "http://localhost:3333/openapi.yaml",
+      "is_user_authenticated": false
+    },
+    "logo_url": "http://localhost:3333/logo.png",
+    "contact_email": "wine.flask@drose.io",
+    "legal_info_url": "http://www.thiswinedoesnotexist.com/"
+  }
