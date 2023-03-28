@@ -58,7 +58,7 @@ blobs = [(int(i.name.split("cat_")[1].split("_")[0]), i.name) for i in blobs]
 
 def sample_from_firestore(return_random=True, label_cat_2=None, doc_id=None):
     LOG.info("Starting firestore sample")
-    if return_random == True:
+    if return_random:
         random_key = store.collection(FIRESTORE_COLLECTION).document().id
         result = (
             store.collection(FIRESTORE_COLLECTION)
