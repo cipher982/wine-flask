@@ -5,10 +5,11 @@ import random
 import sys
 
 from firebase_admin import credentials, firestore, initialize_app
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, send_file
 from google.cloud import storage
 from google.oauth2 import service_account
 from retry import retry
+
 
 # Set constants
 GCLOUD_BUCKET = "wine-flask"
@@ -56,6 +57,10 @@ blobs = storage_client.list_blobs(GCLOUD_BUCKET, prefix=LABELS_BLOB, delimiter=N
 blobs = [(int(i.name.split("cat_")[1].split("_")[0]), i.name) for i in blobs]
 
 
+def sample_label_from_gcs():
+    return random.choice(blobs)
+
+
 def sample_from_firestore(return_random=True, label_cat_2=None, doc_id=None):
     LOG.info("Starting firestore sample")
     if return_random:
@@ -76,16 +81,29 @@ def sample_from_firestore(return_random=True, label_cat_2=None, doc_id=None):
     return result.to_dict()
 
 
-def sample_label_from_gcs():
-    return random.choice(blobs)
-
-
-# openapi plugin
+# chatgpt plugin
 @app.route("/.well-known/ai-plugin.json")
 def get_stuff():
     with open("./.well-known/ai-plugin.json", "r") as f:
         data = json.load(f)
     return jsonify(data)
+
+
+# OpenAPI yaml spec
+@app.route("/openapi.yaml")
+def openapi():
+    with open("./openapi/image-api.yaml", "r") as f:
+        data = f.read()
+    return data
+
+
+# API Image endpoint
+@app.route("/image", methods=["GET"])
+def serve_image():
+    """
+    This endpoint serves an image.
+    """
+    return send_file("./static/wine_logo_2.jpeg", mimetype="image/jpeg")
 
 
 @app.route("/")
