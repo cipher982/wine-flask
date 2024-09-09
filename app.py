@@ -1,15 +1,22 @@
 import json
 import logging
-from os import environ
 import random
+import os
 import sys
+from minio import Minio
+from minio.error import S3Error
+import io
 
-from firebase_admin import credentials, firestore, initialize_app
 from flask import Flask, render_template, jsonify, send_file
 from google.cloud import storage
 from google.oauth2 import service_account
 from retry import retry
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Set constants
 GCLOUD_BUCKET = "wine-flask"
@@ -43,13 +50,19 @@ LOG = logging.getLogger(__name__)
 # Initialize Flask app
 app = Flask(__name__)
 
-# Initialize Firestore client
-firestore_creds = credentials.Certificate(environ["GOOGLE_APPLICATION_CREDENTIALS"])
-firestore_app = initialize_app(firestore_creds)
-store = firestore.client()
+# psql
+def get_db_connection():
+    return psycopg2.connect(
+        host=os.environ.get("DB_HOST", "localhost"),
+        port=os.environ.get("DB_PORT", "5432"),
+        database=os.environ.get("DB_NAME", "postgres"),
+        user=os.environ.get("DB_USER", "postgres"),
+        password=os.environ.get("DB_PASSWORD"),
+        cursor_factory=RealDictCursor
+    )
 
 # Initialize google.cloud client
-gcloud_creds = service_account.Credentials.from_service_account_file(environ["GOOGLE_APPLICATION_CREDENTIALS"])
+gcloud_creds = service_account.Credentials.from_service_account_file(".gcreds")
 
 # Create list of bottles from gcloud blob
 storage_client = storage.Client(credentials=gcloud_creds)
@@ -61,25 +74,27 @@ def sample_label_from_gcs():
     return random.choice(blobs)
 
 
-def sample_from_firestore(return_random=True, label_cat_2=None, doc_id=None):
-    LOG.info("Starting firestore sample")
-    if return_random:
-        random_key = store.collection(FIRESTORE_COLLECTION).document().id
-        result = (
-            store.collection(FIRESTORE_COLLECTION)
-            .where("category_2", "==", CAT_2_DICT[label_cat_2])
-            .where("id", ">=", random_key)
-            .limit(1)
-            .get()[0]
-        )
-    else:
-        result = (
-            store.collection(FIRESTORE_COLLECTION).where("category_2", "==", CAT_2_DICT[label_cat_2]).limit(1).get()[0]
-        )
+def sample_from_postgresql(return_random=True, label_cat_2=None, doc_id=None):
+    LOG.info("Starting PostgreSQL sample")
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            if return_random:
+                cur.execute(
+                    "SELECT * FROM wine_descriptions WHERE category_2 = %s ORDER BY RANDOM() LIMIT 1",
+                    (CAT_2_DICT[label_cat_2],)
+                )
+            else:
+                cur.execute(
+                    "SELECT * FROM wine_descriptions WHERE category_2 = %s LIMIT 1",
+                    (CAT_2_DICT[label_cat_2],)
+                )
+            result = cur.fetchone()
+    finally:
+        conn.close()
 
-    LOG.info(f"Returning firestore sample: {result}")
-    return result.to_dict()
-
+    LOG.info(f"Returning PostgreSQL sample: {result}")
+    return result
 
 # chatgpt plugin
 @app.route("/.well-known/ai-plugin.json")
@@ -117,10 +132,9 @@ def main():
     image_path = IMAGE_DIR + label_path
     LOG.info(f"Returning image path: {image_path}")
 
-    # Sample random description matching the label category
-    wine_description = None
-    while wine_description is None:
-        wine = sample_from_firestore(return_random=True, label_cat_2=label_cat_2)
+    wine = None
+    while wine is None:
+        wine = sample_from_postgresql(return_random=True, label_cat_2=label_cat_2)
         wine_name = wine["name"]
         wine_category_1 = wine["category_1"]
         wine_category_2 = wine["category_2"]
