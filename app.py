@@ -5,11 +5,8 @@ import os
 import sys
 from minio import Minio
 from minio.error import S3Error
-import io
 
-from flask import Flask, render_template, jsonify, send_file
-from google.cloud import storage
-from google.oauth2 import service_account
+from flask import Flask, render_template, jsonify, send_file, Response
 from retry import retry
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -19,11 +16,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Set constants
-GCLOUD_BUCKET = "wine-flask"
-LABELS_BLOB = "labels_on_bottle_v2/bottle_cat_"
-DATASET_DIR = f"https://storage.googleapis.com/{GCLOUD_BUCKET}/descriptions/"
-IMAGE_DIR = f"https://storage.googleapis.com/{GCLOUD_BUCKET}/"
-FIRESTORE_COLLECTION = "gpt2-xl-outputs"
+MINIO_BUCKET = "wine-bottles"
+LABELS_PREFIX = "labels_on_bottle_v2/bottle_cat_"
+MINIO_ENDPOINT = os.environ.get("MINIO_ENDPOINT")
+MINIO_ACCESS_KEY = os.environ.get("MINIO_ACCESS_KEY")
+MINIO_SECRET_KEY = os.environ.get("MINIO_SECRET_KEY")
+IMAGE_DIR = f"http://{MINIO_ENDPOINT}/{MINIO_BUCKET}/"
 CAT_2_DICT = {
     1: "Bordeaux Red Blends",
     2: "Cabernet Sauvignon",
@@ -42,13 +40,20 @@ CAT_2_DICT = {
     15: "Zinfandel",
 }
 
-
 # Initialize logger
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 LOG = logging.getLogger(__name__)
 
 # Initialize Flask app
 app = Flask(__name__)
+
+# Initialize Minio client
+minio_client = Minio(
+    MINIO_ENDPOINT,
+    access_key=MINIO_ACCESS_KEY,
+    secret_key=MINIO_SECRET_KEY,
+    secure=False,
+)
 
 # psql
 def get_db_connection():
@@ -61,18 +66,17 @@ def get_db_connection():
         cursor_factory=RealDictCursor
     )
 
-# Initialize google.cloud client
-gcloud_creds = service_account.Credentials.from_service_account_file(".gcreds")
+# Create list of bottles from Minio bucket
+def get_bottle_list():
+    objects = minio_client.list_objects(
+        MINIO_BUCKET,
+        recursive=True
+    )
+    return [(int(obj.object_name.split("cat_")[1].split("_")[0]), obj.object_name) for obj in objects]
 
-# Create list of bottles from gcloud blob
-storage_client = storage.Client(credentials=gcloud_creds)
-blobs = storage_client.list_blobs(GCLOUD_BUCKET, prefix=LABELS_BLOB, delimiter=None)
-blobs = [(int(i.name.split("cat_")[1].split("_")[0]), i.name) for i in blobs]
-
-
-def sample_label_from_gcs():
-    return random.choice(blobs)
-
+def sample_label_from_minio():
+    bottle_list = get_bottle_list()
+    return random.choice(bottle_list)
 
 def sample_from_postgresql(return_random=True, label_cat_2=None, doc_id=None):
     LOG.info("Starting PostgreSQL sample")
@@ -103,14 +107,12 @@ def get_stuff():
         data = json.load(f)
     return jsonify(data)
 
-
 # OpenAPI yaml spec
 @app.route("/openapi.yaml")
 def openapi():
     with open("./openapi/image-api.yaml", "r") as f:
         data = f.read()
     return data
-
 
 # API Image endpoint
 @app.route("/image", methods=["GET"])
@@ -120,6 +122,18 @@ def serve_image():
     """
     return send_file("./static/wine_logo_2.jpeg", mimetype="image/jpeg")
 
+@app.route("/minio-image/<path:image_path>")
+def serve_minio_image(image_path):
+    try:
+        response = minio_client.get_object(MINIO_BUCKET, image_path)
+        return Response(
+            response.data,
+            mimetype="image/png",
+            headers={"Content-Disposition": f"inline; filename={image_path.split('/')[-1]}"}
+        )
+    except S3Error as e:
+        return f"Error retrieving image: {str(e)}", 404
+
 
 @app.route("/")
 @app.route("/wine")
@@ -128,8 +142,8 @@ def main():
     LOG.info("Starting request")
 
     # Sample a random wine label
-    label_cat_2, label_path = sample_label_from_gcs()
-    image_path = IMAGE_DIR + label_path
+    label_cat_2, label_path = sample_label_from_minio()
+    image_path = f"/minio-image/{label_path}"
     LOG.info(f"Returning image path: {image_path}")
 
     wine = None
