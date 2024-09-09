@@ -1,4 +1,3 @@
-import json
 import logging
 import random
 import os
@@ -6,7 +5,7 @@ import sys
 from minio import Minio
 from minio.error import S3Error
 
-from flask import Flask, render_template, jsonify, send_file, Response
+from flask import Flask, render_template, send_file, Response
 from retry import retry
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -99,20 +98,6 @@ def sample_from_postgresql(return_random=True, label_cat_2=None, doc_id=None):
 
     LOG.info(f"Returning PostgreSQL sample: {result}")
     return result
-
-# chatgpt plugin
-@app.route("/.well-known/ai-plugin.json")
-def get_stuff():
-    with open("./.well-known/ai-plugin.json", "r") as f:
-        data = json.load(f)
-    return jsonify(data)
-
-# OpenAPI yaml spec
-@app.route("/openapi.yaml")
-def openapi():
-    with open("./openapi/image-api.yaml", "r") as f:
-        data = f.read()
-    return data
 
 # API Image endpoint
 @app.route("/image", methods=["GET"])
