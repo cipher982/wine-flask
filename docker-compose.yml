@@ -1,9 +1,5 @@
 services:
   wine:
     build: .
-    ports:
-      - "5001:5000"
-    environment:
-      - FLASK_ENV=development
     env_file:
       - .env
