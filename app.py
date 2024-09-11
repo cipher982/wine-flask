@@ -100,14 +100,34 @@ def get_minio_client():
 
 
 def get_db_connection():
-    return psycopg2.connect(
-        host=settings.db_host,
-        port=settings.db_port,
-        database=settings.db_name,
-        user=settings.db_user,
-        password=settings.db_password,
-        cursor_factory=RealDictCursor,
-    )
+    try:
+        conn = psycopg2.connect(
+            host=settings.db_host,
+            port=settings.db_port,
+            database=settings.db_name,
+            user=settings.db_user,
+            password=settings.db_password,
+            cursor_factory=RealDictCursor,
+            connect_timeout=3,
+        )
+        LOG.info("Database connection successful")
+        return conn
+    except psycopg2.Error as e:
+        LOG.error(f"Unable to connect to the database: {e}")
+        raise
+
+
+@app.get("/db-health")
+async def db_health_check():
+    try:
+        conn = get_db_connection()
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1")
+        conn.close()
+        return {"status": "ok"}
+    except Exception as e:
+        LOG.error(f"Database health check failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 def get_bottle_list() -> list[BottleInfo]:
