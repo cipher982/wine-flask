@@ -29,4 +29,4 @@ ENV PATH="/app/.venv/bin:$PATH"
 ENTRYPOINT []
 
 # Run the FastAPI application
-CMD ["python", "-m", "fastapi", "run", "--host=0.0.0.0"]
+CMD ["uv", "run", "python", "-m", "fastapi", "run", "--host=0.0.0.0"]

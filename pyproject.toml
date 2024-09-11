@@ -1,7 +1,7 @@
 [project]
 name = "wine-app"
 version = "0.1.0"
-description = "A Flask app for serving wine information"
+description = "A web app for serving wine information"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.114.0",
