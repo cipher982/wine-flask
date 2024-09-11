@@ -195,7 +195,6 @@ async def main(request: Request):
         {
             "request": request,
             "w_name": wine["name"],
-            "w_category_1": wine["category_1"],
             "w_category_2": wine["category_2"],
             "w_origin": wine["origin"],
             "w_description": wine["description"],
