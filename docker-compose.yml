@@ -3,3 +3,9 @@ services:
     build: .
     env_file:
       - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 5m
+      timeout: 5s
+      retries: 3
+      start_period: 5s

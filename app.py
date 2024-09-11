@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi import HTTPException
 from fastapi import Request
+from fastapi import status
 from fastapi.responses import FileResponse
 from fastapi.responses import HTMLResponse
 from fastapi.responses import Response
@@ -18,6 +19,7 @@ from fastapi.templating import Jinja2Templates
 from minio import Minio
 from minio.error import S3Error
 from psycopg2.extras import RealDictCursor
+from psycopg2.pool import SimpleConnectionPool
 from pydantic import BaseModel
 
 load_dotenv()
@@ -117,19 +119,6 @@ def get_db_connection():
         raise
 
 
-@app.get("/db-health")
-async def db_health_check():
-    try:
-        conn = get_db_connection()
-        with conn.cursor() as cur:
-            cur.execute("SELECT 1")
-        conn.close()
-        return {"status": "ok"}
-    except Exception as e:
-        LOG.error(f"Database health check failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e)) from e
-
-
 def get_bottle_list() -> list[BottleInfo]:
     objects = get_minio_client().list_objects(MINIO_BUCKET, recursive=True)
     return [
@@ -209,3 +198,43 @@ async def main(request: Request):
             "w_image": image_path,
         },
     )
+
+
+# Create a connection pool
+db_pool = SimpleConnectionPool(
+    1,
+    20,
+    host=settings.db_host,
+    port=settings.db_port,
+    database=settings.db_name,
+    user=settings.db_user,
+    password=settings.db_password,
+)
+
+
+@app.get("/health", status_code=status.HTTP_200_OK)
+async def health_check():
+    health_status = {"database": "unhealthy", "minio": "unhealthy"}
+
+    # Check database connection
+    try:
+        conn = db_pool.getconn()
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1")
+        db_pool.putconn(conn)
+        health_status["database"] = "healthy"
+    except Exception as e:
+        LOG.error(f"Database health check failed: {e}")
+
+    # Check MinIO connection
+    try:
+        minio_client = get_minio_client()
+        minio_client.list_buckets()
+        health_status["minio"] = "healthy"
+    except Exception as e:
+        LOG.error(f"MinIO health check failed: {e}")
+
+    if all(status == "healthy" for status in health_status.values()):
+        return health_status
+    else:
+        raise HTTPException(status_code=503, detail=health_status)
