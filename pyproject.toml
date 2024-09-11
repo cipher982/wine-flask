@@ -16,11 +16,13 @@ dependencies = [
 py_modules = ["app"]
 
 [tool.ruff]
-select = ["E", "F", "I", "B", "W", "C90"]
-ignore = ["E501"]
 line-length = 120
 
-[tool.ruff.isort]
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "W", "C90"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
 force-single-line = true
 
 [tool.ruff.lint.flake8-quotes]

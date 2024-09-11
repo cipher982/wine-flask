@@ -1,18 +1,19 @@
 import logging
-import random
 import os
+import random
 import sys
 from enum import Enum
-from minio import Minio
-from minio.error import S3Error
 from typing import TypeAlias
 
-from flask import Flask, render_template, send_file, Response
-from retry import retry
 import psycopg2
-from psycopg2.extras import RealDictCursor
-
 from dotenv import load_dotenv
+from flask import Flask
+from flask import Response
+from flask import render_template
+from flask import send_file
+from minio import Minio
+from minio.error import S3Error
+from psycopg2.extras import RealDictCursor
 
 load_dotenv()
 
@@ -26,6 +27,7 @@ IMAGE_DIR = f"http://{MINIO_ENDPOINT}/{MINIO_BUCKET}/"
 
 WineRecord: TypeAlias = dict[str, str | int | float]
 BottleInfo: TypeAlias = tuple[int, str]
+
 
 class WineCategory(Enum):
     BORDEAUX_RED_BLENDS = 1
@@ -48,6 +50,7 @@ class WineCategory(Enum):
     def display_name(self):
         return self.name.replace("_", " ").title()
 
+
 # Initialize logger
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 LOG = logging.getLogger(__name__)
@@ -55,7 +58,7 @@ LOG = logging.getLogger(__name__)
 # Initialize Flask app
 app = Flask(__name__)
 
-@retry(exceptions=S3Error, tries=3, delay=1, backoff=2)
+
 def get_minio_client():
     assert MINIO_ENDPOINT is not None, "MINIO_ENDPOINT is not set"
     return Minio(
@@ -74,24 +77,21 @@ def get_db_connection():
         database=os.environ.get("DB_NAME", "postgres"),
         user=os.environ.get("DB_USER", "postgres"),
         password=os.environ.get("DB_PASSWORD"),
-        cursor_factory=RealDictCursor
+        cursor_factory=RealDictCursor,
     )
 
+
 def get_bottle_list() -> list[BottleInfo]:
-    objects = get_minio_client().list_objects(
-        MINIO_BUCKET,
-        recursive=True
-    )
+    objects = get_minio_client().list_objects(MINIO_BUCKET, recursive=True)
     return [
-        (int(obj.object_name.split("cat_")[1].split("_")[0]), obj.object_name)
-        for obj in objects
-        if obj.object_name
+        (int(obj.object_name.split("cat_")[1].split("_")[0]), obj.object_name) for obj in objects if obj.object_name
     ]
 
 
 def sample_label_from_minio() -> BottleInfo:
     bottle_list = get_bottle_list()
     return random.choice(bottle_list)
+
 
 def sample_from_postgresql(label_cat_2: int) -> WineRecord:
     category = WineCategory(label_cat_2)
@@ -101,7 +101,7 @@ def sample_from_postgresql(label_cat_2: int) -> WineRecord:
         with conn.cursor() as cur:
             cur.execute(
                 "SELECT * FROM wine_descriptions WHERE category_2 = %s ORDER BY RANDOM() LIMIT 1",
-                (category.display_name,)
+                (category.display_name,),
             )
             result = cur.fetchone()
             if result is None:
@@ -112,6 +112,7 @@ def sample_from_postgresql(label_cat_2: int) -> WineRecord:
     wine_record: WineRecord = dict(result)
     LOG.info(f"Returning wine: {wine_record['name']}")
     return wine_record
+
 
 # API Image endpoint
 @app.route("/image", methods=["GET"])
@@ -129,7 +130,7 @@ def serve_minio_image(image_path: str) -> Response:
         return Response(
             response.data,
             mimetype="image/png",
-            headers={"Content-Disposition": f"inline; filename={image_path.split('/')[-1]}"}
+            headers={"Content-Disposition": f"inline; filename={image_path.split('/')[-1]}"},
         )
     except S3Error as e:
         return Response(f"Error retrieving image: {str(e)}", status=404)
@@ -137,7 +138,6 @@ def serve_minio_image(image_path: str) -> Response:
 
 @app.route("/")
 @app.route("/wine")
-@retry((Exception), tries=5, delay=0, backoff=0)
 def main() -> str:
     LOG.info("Starting request")
 
