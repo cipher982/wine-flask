@@ -28,5 +28,5 @@ ENV PATH="/app/.venv/bin:$PATH"
 # Reset the entrypoint
 ENTRYPOINT []
 
-# Run the Flask application
-CMD ["python", "-m", "flask", "run", "--host=0.0.0.0"]
+# Run the FastAPI application
+CMD ["python", "-m", "fastapi", "run", "--host=0.0.0.0"]
