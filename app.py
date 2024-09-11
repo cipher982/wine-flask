@@ -143,7 +143,11 @@ def sample_from_postgresql(label_cat_2: int) -> WineRecord:
             )
             result = cur.fetchone()
             if result is None:
-                raise HTTPException(status_code=404, detail=f"No wine found for category: {category.display_name}")
+                LOG.warning(f"No wine found for category: {category.display_name}. Sampling from all categories.")
+                cur.execute("SELECT * FROM wine_descriptions ORDER BY RANDOM() LIMIT 1")
+                result = cur.fetchone()
+                if result is None:
+                    raise HTTPException(status_code=500, detail="No wines found in the database")
     finally:
         conn.close()
 
