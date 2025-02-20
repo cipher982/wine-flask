@@ -4,6 +4,9 @@ FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 # Set working directory
 WORKDIR /app
 
+# Install curl for healthcheck while keeping the image slim
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 # Enable bytecode compilation
 ENV UV_COMPILE_BYTECODE=1
 
