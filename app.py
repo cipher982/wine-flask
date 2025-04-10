@@ -178,7 +178,9 @@ async def serve_minio_image(image_path: str):
 
 
 @app.get("/", response_class=HTMLResponse)
+@app.head("/", response_class=HTMLResponse)
 @app.get("/wine", response_class=HTMLResponse)
+@app.head("/wine", response_class=HTMLResponse)
 async def main(request: Request):
     LOG.info("Starting request")
 
