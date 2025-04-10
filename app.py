@@ -13,11 +13,9 @@ from fastapi import Request
 from fastapi import status
 from fastapi.responses import FileResponse
 from fastapi.responses import HTMLResponse
-from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from minio import Minio
-from minio.error import S3Error
 from psycopg2.extras import RealDictCursor
 from psycopg2.pool import SimpleConnectionPool
 from pydantic import BaseModel
@@ -164,19 +162,6 @@ async def serve_image():
     return FileResponse("./static/wine_logo_2.jpeg", media_type="image/jpeg")
 
 
-@app.get("/minio-image/{image_path:path}")
-async def serve_minio_image(image_path: str):
-    try:
-        response = get_minio_client().get_object(MINIO_BUCKET, image_path)
-        return Response(
-            content=response.data,
-            media_type="image/png",
-            headers={"Content-Disposition": f"inline; filename={image_path.split('/')[-1]}"},
-        )
-    except S3Error as e:
-        raise HTTPException(status_code=404, detail=f"Error retrieving image: {str(e)}") from e
-
-
 @app.get("/", response_class=HTMLResponse)
 @app.head("/", response_class=HTMLResponse)
 @app.get("/wine", response_class=HTMLResponse)
@@ -186,7 +171,8 @@ async def main(request: Request):
 
     # Sample a random wine label
     label_cat_2, label_path = sample_label_from_minio()
-    image_path: str = f"/minio-image/{label_path}"
+    # Use direct MinIO URL instead of proxy endpoint
+    image_path: str = f"{IMAGE_DIR}{label_path}"
     LOG.info(f"Selected image path: {image_path}")
 
     wine: WineRecord = sample_from_postgresql(label_cat_2)
