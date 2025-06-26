@@ -2,48 +2,212 @@
   <head>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', path='favicon.ico') }}">
     <style>
-      div {
-        margin-right: 50px;
-        margin-left: 50px;;
+      :root {
+        --win98-face: #C3C3C3;
+        --win98-shadow: #818181;
+        --win98-highlight: #FDFFFF;
+        --win98-accent: #000080;
+        --win98-text: #000000;
+        --win98-button-face: #C3C3C3;
+        --win98-button-shadow: #808080;
+        --win98-button-highlight: #FFFFFF;
+        --win98-window-frame: #C0C0C0;
+      }
+
+      html {
+        image-rendering: pixelated;
+        -webkit-font-smoothing: none;
+        font-smooth: never;
+        -moz-osx-font-smoothing: unset;
+      }
+
+      body {
+        font-family: "MS Sans Serif", "Tahoma", system-ui, sans-serif;
+        font-size: 11px;
+        background: #008080;
+        color: var(--win98-text);
+        margin: 0;
+        padding: 20px;
+        line-height: 1.4;
+        min-height: 100vh;
+        box-sizing: border-box;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: var(--win98-face);
+        border: 2px solid;
+        border-color: var(--win98-highlight) var(--win98-shadow) var(--win98-shadow) var(--win98-highlight);
+        padding: 15px;
+        box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      }
+
+      .title-bar {
+        background: linear-gradient(90deg, var(--win98-accent) 0%, #1084d0 100%);
+        color: white;
+        padding: 8px 12px;
+        font-weight: bold;
+        font-size: 12px;
+        border: 2px solid;
+        border-color: var(--win98-highlight) var(--win98-shadow) var(--win98-shadow) var(--win98-highlight);
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 16px;
+        font-weight: bold;
+        margin: 0 0 10px 0;
+        text-align: center;
+      }
+
+      h2 {
+        font-size: 14px;
+        font-weight: bold;
+        margin: 0 0 10px 0;
+        text-align: center;
+        background: transparent;
+        padding: 5px;
+        border: none;
+      }
+
+      h4 {
+        font-size: 11px;
+        font-weight: bold;
+        margin: 8px 0;
+        text-align: center;
+      }
+
+      button {
+        font-family: "MS Sans Serif", "Tahoma", system-ui, sans-serif;
+        font-size: 11px;
+        background: var(--win98-button-face);
+        border: 2px solid;
+        border-color: var(--win98-button-highlight) var(--win98-button-shadow) var(--win98-button-shadow) var(--win98-button-highlight);
+        padding: 4px 8px;
+        cursor: pointer;
+        color: var(--win98-text);
+        margin: 10px auto;
+        display: block;
+      }
+
+      button:active {
+        border-color: var(--win98-button-shadow) var(--win98-button-highlight) var(--win98-button-highlight) var(--win98-button-shadow);
+        background: #A9A9A9;
+      }
+
+      button:hover {
+        background: #D6D6D6;
+      }
+
+      .wine-details {
+        border: 2px solid;
+        border-color: var(--win98-shadow) var(--win98-highlight) var(--win98-highlight) var(--win98-shadow);
+        background: var(--win98-face);
+        padding: 10px;
+        margin: 10px 0;
+        text-align: center;
+      }
+
+      .description {
+        border: 2px solid;
+        border-color: var(--win98-shadow) var(--win98-highlight) var(--win98-highlight) var(--win98-shadow);
+        background: var(--win98-face);
+        padding: 15px;
+        margin: 15px 0;
+        text-align: justify;
+        line-height: 1.4;
+      }
+
+      .image-container {
+        text-align: center;
+        margin: 20px 0;
+      }
+
+      .image-container img {
+        border: 2px solid;
+        border-color: var(--win98-shadow) var(--win98-highlight) var(--win98-highlight) var(--win98-shadow);
+        padding: 5px;
+        background: var(--win98-face);
+      }
+
+      hr {
+        border: none;
+        height: 2px;
+        background: var(--win98-shadow);
+        margin: 15px 0;
+      }
+
+      footer {
+        border: 2px solid;
+        border-color: var(--win98-highlight) var(--win98-shadow) var(--win98-shadow) var(--win98-highlight);
+        background: var(--win98-face);
+        padding: 10px;
+        margin-top: 20px;
+        font-size: 10px;
+      }
+
+      footer p {
+        margin: 5px 0;
+      }
+
+      footer li {
+        margin: 3px 0;
+      }
+
+      a {
+        color: var(--win98-accent);
+        text-decoration: underline;
+      }
+
+      a:visited {
+        color: #800080;
       }
       </style>
   </head>
   <body>
-    <h1 align="center">This Wine Does Not Exist</h1>
-    <hr>
-    <button onclick="myFunction()">Reload page for new result!</button>
-    <script>
-    function myFunction() {
-      location.reload();
-      }
-    </script>
-    <h2 align="center"> {{ w_name }}</h3>
-    <!-- <h4 align="center"> ${{ w_price }}</h4> -->
-    <h4 align="center"> <b>Category:</b> {{ w_category_2 }}</h4>
-    <h4 align="center"> <b>Origin:</b> {{ w_origin }}</h4>
+    <div class="container">
+      <div class="title-bar">This Wine Does Not Exist</div>
 
+      <h1>Virtual Wine Generator</h1>
 
-  <p style="text-align:center;"><img src="{{ w_image }}" width="150" height="450" alt="Fake Bottle"></p>
+      <button onclick="myFunction()">Reload page for new result!</button>
+      <script>
+      function myFunction() {
+        location.reload();
+        }
+      </script>
 
-  <div> {{ w_description }} </div>
+      <div class="wine-details">
+        <h2>{{ w_name }}</h2>
+        <!-- <h4><b>Price:</b> ${{ w_price }}</h4> -->
+        <h4><b>Category:</b> {{ w_category_2 }}</h4>
+        <h4><b>Origin:</b> {{ w_origin }}</h4>
+      </div>
 
-  <hr>
+      <div class="image-container">
+        <img src="{{ w_image }}" width="150" height="450" alt="Fake Bottle">
+      </div>
+
+      <div class="description">{{ w_description }}</div>
+
+      <footer>
+        <p>Created by: David Rose</p>
+        <p>Created with: Python, Tensorflow, PyTorch, Uvicorn, FastAPI</p>
+        <p>
+          <li><b>Name:</b> (TensorFlow) Character embedding layer, LSTM x 2, Dense ASCII output</li>
+          <li><b>Description:</b>(PyTorch) GPT2-XL 1.5b parameters, trained on 130,000 samples</li>
+          <!-- <li><b>Price:</b>(Keras) Character embedding layer, Convolution, Pooling, Dense 100, Dense 1 regression output</li> -->
+          <li><b>Label:</b>(TensorFlow) NVIDIA StyleGAN2 and CV2</li>
+        </p>
+        <p>Models and Development Repo: <a href="https://github.com/cipher982/this-wine-does-not-exist">
+          https://github.com/cipher982/this-wine-does-not-exist</a></p>
+        <p>Web App Repo: <a href="https://github.com/cipher982/wine-flask">
+          https://github.com/cipher982/wine-flask</a></p>
+      </footer>
+    </div>
 
   </body>
-  <footer>
-    <p>Created by: David Rose</p>
-    <p>Created with: Python, Tensorflow, PyTorch, Uvicorn, FastAPI</p>
-    <p>
-      <li><b>Name:</b> (TensorFlow) Character embedding layer, LSTM x 2, Dense ASCII output</li>
-      <li><b>Description:</b>(PyTorch) GPT2-XL 1.5b parameters, trained on 130,000 samples</li>
-      <!-- <li><b>Price:</b>(Keras) Character embedding layer, Convolution, Pooling, Dense 100, Dense 1 regression output</li> -->
-      <li><b>Label:</b>(TensorFlow) NVIDIA StyleGAN2 and CV2</li>
-    </p>
-    <p>Models and Development Repo: <a href="https://github.com/cipher982/this-wine-does-not-exist">
-      https://github.com/cipher982/this-wine-does-not-exist</a></p>
-    <p>Web App Repo: <a href="https://github.com/cipher982/wine-flask">
-      https://github.com/cipher982/wine-flask</a></p>
-
-  </footer>
 
 </html>
