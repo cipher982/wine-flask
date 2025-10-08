@@ -1,11 +1,12 @@
 import logging
 import os
 import random
+import sqlite3
 import sys
 from enum import Enum
+from pathlib import Path
 from typing import TypeAlias
 
-import psycopg2
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi import HTTPException
@@ -16,8 +17,6 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from minio import Minio
-from psycopg2.extras import RealDictCursor
-from psycopg2.pool import SimpleConnectionPool
 from pydantic import BaseModel
 
 load_dotenv()
@@ -56,11 +55,6 @@ class Settings(BaseModel):
     minio_endpoint: str
     minio_access_key: str
     minio_secret_key: str
-    db_host: str
-    db_port: str
-    db_name: str
-    db_user: str
-    db_password: str
 
     class Config:
         env_file = ".env"
@@ -70,18 +64,40 @@ settings = Settings(
     minio_endpoint=os.environ["MINIO_ENDPOINT"],
     minio_access_key=os.environ["MINIO_ACCESS_KEY"],
     minio_secret_key=os.environ["MINIO_SECRET_KEY"],
-    db_host=os.environ["DB_HOST"],
-    db_port=os.environ["DB_PORT"],
-    db_name=os.environ["DB_NAME"],
-    db_user=os.environ["DB_USER"],
-    db_password=os.environ["DB_PASSWORD"],
 )
 # Initialize logger
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 LOG = logging.getLogger(__name__)
 
+# Database path
+DB_PATH = Path("/tmp/wine_data.db")
+
+
+def download_database_from_minio():
+    """Download SQLite database from MinIO at startup."""
+    if DB_PATH.exists():
+        LOG.info(f"Database already exists at {DB_PATH}")
+        return
+
+    LOG.info("Downloading wine database from MinIO...")
+    try:
+        client = get_minio_client()
+        client.fget_object("wine-data", "wine_data.db", str(DB_PATH))
+        LOG.info(f"✅ Database downloaded successfully to {DB_PATH}")
+    except Exception as e:
+        LOG.error(f"❌ Failed to download database from MinIO: {e}")
+        raise
+
+
 # Initialize FastAPI app
 app = FastAPI()
+
+
+# Download database on startup
+@app.on_event("startup")
+def startup_event():
+    download_database_from_minio()
+
 
 # Set up static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -100,19 +116,14 @@ def get_minio_client():
 
 
 def get_db_connection():
+    """Get SQLite database connection."""
     try:
-        conn = psycopg2.connect(
-            host=settings.db_host,
-            port=settings.db_port,
-            database=settings.db_name,
-            user=settings.db_user,
-            password=settings.db_password,
-            cursor_factory=RealDictCursor,
-            connect_timeout=3,
-        )
-        LOG.info("Database connection successful")
+        conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True, check_same_thread=False)
+        conn.row_factory = sqlite3.Row  # Return rows as dict-like objects
+        conn.execute("PRAGMA query_only = ON")
+        conn.execute("PRAGMA cache_size = 10000")
         return conn
-    except psycopg2.Error as e:
+    except sqlite3.Error as e:
         LOG.error(f"Unable to connect to the database: {e}")
         raise
 
@@ -129,23 +140,24 @@ def sample_label_from_minio() -> BottleInfo:
     return random.choice(bottle_list)
 
 
-def sample_from_postgresql(label_cat_2: int) -> WineRecord:
+def sample_from_sqlite(label_cat_2: int) -> WineRecord:
+    """Sample a wine from SQLite database by category."""
     category = WineCategory(label_cat_2)
     LOG.info(f"Sampling wine for category: {category.display_name}")
     conn = get_db_connection()
     try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT * FROM wine_descriptions WHERE category_2 = %s ORDER BY RANDOM() LIMIT 1",
-                (category.display_name,),
-            )
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT * FROM wine_descriptions WHERE category_2 = ? ORDER BY RANDOM() LIMIT 1",
+            (category.display_name,),
+        )
+        result = cur.fetchone()
+        if result is None:
+            LOG.warning(f"No wine found for category: {category.display_name}. Sampling from all categories.")
+            cur.execute("SELECT * FROM wine_descriptions ORDER BY RANDOM() LIMIT 1")
             result = cur.fetchone()
             if result is None:
-                LOG.warning(f"No wine found for category: {category.display_name}. Sampling from all categories.")
-                cur.execute("SELECT * FROM wine_descriptions ORDER BY RANDOM() LIMIT 1")
-                result = cur.fetchone()
-                if result is None:
-                    raise HTTPException(status_code=500, detail="No wines found in the database")
+                raise HTTPException(status_code=500, detail="No wines found in the database")
     finally:
         conn.close()
 
@@ -175,7 +187,7 @@ async def main(request: Request):
     image_path: str = f"{IMAGE_DIR}{label_path}"
     LOG.info(f"Selected image path: {image_path}")
 
-    wine: WineRecord = sample_from_postgresql(label_cat_2)
+    wine: WineRecord = sample_from_sqlite(label_cat_2)
     LOG.info(f"Returning description for: {wine['name']}")
 
     return templates.TemplateResponse(
@@ -191,28 +203,16 @@ async def main(request: Request):
     )
 
 
-# Create a connection pool
-db_pool = SimpleConnectionPool(
-    1,
-    20,
-    host=settings.db_host,
-    port=settings.db_port,
-    database=settings.db_name,
-    user=settings.db_user,
-    password=settings.db_password,
-)
-
-
 @app.get("/health", status_code=status.HTTP_200_OK)
 async def health_check():
     health_status = {"database": "unhealthy", "minio": "unhealthy"}
 
     # Check database connection
     try:
-        conn = db_pool.getconn()
-        with conn.cursor() as cur:
-            cur.execute("SELECT 1")
-        db_pool.putconn(conn)
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT 1")
+        conn.close()
         health_status["database"] = "healthy"
     except Exception as e:
         LOG.error(f"Database health check failed: {e}")

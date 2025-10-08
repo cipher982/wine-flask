@@ -3,12 +3,6 @@ services:
     build: .
     env_file:
       - .env
-    environment:
-      DB_HOST: host.docker.internal
-      DB_PORT: 5432
-      DB_NAME: postgres
-      DB_USER: postgres
-      DB_PASSWORD: your_local_postgres_password
     ports:
       - "8000:8000"
     healthcheck:

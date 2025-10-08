@@ -10,3 +10,7 @@ __pycache__
 firestore_export/
 .gcreds
 notebooks/
+# Data artifacts (source of truth is in MinIO)
+wine_data.csv
+wine_data.db
+dev-data/
