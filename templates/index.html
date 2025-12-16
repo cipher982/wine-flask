@@ -165,7 +165,9 @@
         color: #800080;
       }
       </style>
-    <script defer src="https://analytics.drose.io/script.js" data-website-id="29417eb6-2010-4dbe-bd7b-9911c6e41dfe"></script>
+    {% if umami_enabled %}
+    <script defer src="{{ umami_script_url }}" data-website-id="{{ umami_website_id }}" data-domains="{{ umami_domains }}"></script>
+    {% endif %}
   </head>
   <body>
     <div class="container">

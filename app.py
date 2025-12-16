@@ -55,6 +55,11 @@ class Settings(BaseModel):
     minio_endpoint: str
     minio_access_key: str
     minio_secret_key: str
+    # Analytics - Umami self-hosted on clifford
+    umami_website_id: str = ""
+    umami_script_src: str = ""
+    umami_domains: str = ""
+    umami_enabled: bool = False
 
     class Config:
         env_file = ".env"
@@ -64,6 +69,10 @@ settings = Settings(
     minio_endpoint=os.environ["MINIO_ENDPOINT"],
     minio_access_key=os.environ["MINIO_ACCESS_KEY"],
     minio_secret_key=os.environ["MINIO_SECRET_KEY"],
+    umami_website_id=os.environ.get("UMAMI_WEBSITE_ID", ""),
+    umami_script_src=os.environ.get("UMAMI_SCRIPT_SRC", ""),
+    umami_domains=os.environ.get("UMAMI_DOMAINS", ""),
+    umami_enabled=os.environ.get("UMAMI_ENABLED", "false").lower() in ("true", "1", "yes"),
 )
 # Initialize logger
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -113,6 +122,19 @@ def get_minio_client():
         secret_key=settings.minio_secret_key,
         secure=True,
     )
+
+
+def get_umami_context() -> dict:
+    """Return all Umami analytics context variables for templates.
+
+    Follows the organizational standard from ~/git/me/mytech/operations/umami.md
+    """
+    return {
+        "umami_enabled": settings.umami_enabled,
+        "umami_script_url": settings.umami_script_src,
+        "umami_website_id": settings.umami_website_id,
+        "umami_domains": settings.umami_domains,
+    }
 
 
 def get_db_connection():
@@ -199,6 +221,7 @@ async def main(request: Request):
             "w_origin": wine["origin"],
             "w_description": wine["description"],
             "w_image": image_path,
+            **get_umami_context(),
         },
     )
 
