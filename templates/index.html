@@ -166,7 +166,8 @@
       }
       </style>
     {% if umami_enabled %}
-    <script defer src="{{ umami_script_url }}" data-website-id="{{ umami_website_id }}" data-domains="{{ umami_domains }}"></script>
+    <script defer src="{{ umami_script_url }}" data-website-id="{{ umami_website_id }}" data-domains="{{ umami_domains }}" data-tag="{{ umami_tag }}" data-performance="true"></script>
+    <script defer src="{{ umami_script_url | replace('script.js', 'recorder.js') }}" data-website-id="{{ umami_website_id }}" data-sample-rate="1" data-mask-level="moderate" data-max-duration="1800000"></script>
     {% endif %}
   </head>
   <body>

@@ -59,6 +59,7 @@ class Settings(BaseModel):
     umami_website_id: str = ""
     umami_script_src: str = ""
     umami_domains: str = ""
+    umami_tag: str = "prod"
     umami_enabled: bool = False
 
     class Config:
@@ -72,6 +73,7 @@ settings = Settings(
     umami_website_id=os.environ.get("UMAMI_WEBSITE_ID", ""),
     umami_script_src=os.environ.get("UMAMI_SCRIPT_SRC", ""),
     umami_domains=os.environ.get("UMAMI_DOMAINS", ""),
+    umami_tag=os.environ.get("UMAMI_TAG", "prod"),
     umami_enabled=os.environ.get("UMAMI_ENABLED", "false").lower() in ("true", "1", "yes"),
 )
 # Initialize logger
