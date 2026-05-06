@@ -14,6 +14,7 @@ from fastapi import Request
 from fastapi import status
 from fastapi.responses import FileResponse
 from fastapi.responses import HTMLResponse
+from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from minio import Minio
@@ -23,10 +24,11 @@ load_dotenv()
 
 # Set constants
 MINIO_BUCKET = "wine-bottles"
-IMAGE_DIR = f"http://{os.environ.get('MINIO_ENDPOINT')}/{MINIO_BUCKET}/"
+IMAGE_DIR = f"https://{os.environ.get('MINIO_ENDPOINT')}/{MINIO_BUCKET}/"
 
 WineRecord: TypeAlias = dict[str, str | int | float]
 BottleInfo: TypeAlias = tuple[int, str]
+BOTTLE_LIST: list[BottleInfo] = []
 
 
 class WineCategory(Enum):
@@ -48,7 +50,12 @@ class WineCategory(Enum):
 
     @property
     def display_name(self):
-        return self.name.replace("_", " ").title()
+        display_names = {
+            WineCategory.PINOT_GRIS_GRIGIO: "Pinot Gris/Grigio",
+            WineCategory.ROSE: "Rosé",
+            WineCategory.SYRAH_SHIRAZ: "Syrah/Shiraz",
+        }
+        return display_names.get(self, self.name.replace("_", " ").title())
 
 
 class Settings(BaseModel):
@@ -108,6 +115,7 @@ app = FastAPI()
 @app.on_event("startup")
 def startup_event():
     download_database_from_minio()
+    load_bottle_list()
 
 
 # Set up static files
@@ -159,9 +167,22 @@ def get_bottle_list() -> list[BottleInfo]:
     ]
 
 
+def load_bottle_list() -> None:
+    global BOTTLE_LIST
+    BOTTLE_LIST = get_bottle_list()
+    LOG.info(f"Loaded {len(BOTTLE_LIST)} wine bottle labels")
+
+
 def sample_label_from_minio() -> BottleInfo:
-    bottle_list = get_bottle_list()
-    return random.choice(bottle_list)
+    if not BOTTLE_LIST:
+        load_bottle_list()
+    return random.choice(BOTTLE_LIST)
+
+
+@app.head("/")
+@app.head("/wine")
+def head_main():
+    return Response(status_code=status.HTTP_200_OK)
 
 
 def sample_from_sqlite(label_cat_2: int) -> WineRecord:
@@ -199,10 +220,8 @@ async def serve_image():
 
 
 @app.get("/", response_class=HTMLResponse)
-@app.head("/", response_class=HTMLResponse)
 @app.get("/wine", response_class=HTMLResponse)
-@app.head("/wine", response_class=HTMLResponse)
-async def main(request: Request):
+def main(request: Request):
     LOG.info("Starting request")
 
     # Sample a random wine label
