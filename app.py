@@ -3,7 +3,6 @@ import os
 import random
 import sqlite3
 import sys
-from datetime import date
 from enum import Enum
 from pathlib import Path
 from typing import TypeAlias
@@ -118,16 +117,18 @@ SEO_PAGES: dict[str, SEOPage] = {
         "description": "Background on This Wine Does Not Exist, an older AI wine name, description, and label generation project.",
         "heading": "About This Wine Does Not Exist",
         "intro": (
-            "This Wine Does Not Exist is a small AI art project by David Rose. It started as a data collection and "
-            "model-training experiment using wine names, descriptions, and bottle label images."
+            "This Wine Does Not Exist is a small AI art project by David Rose. It started as an experiment in "
+            "scraping wine data, training neural networks on wine text, and generating bottle labels before modern "
+            "image generators made that kind of output ordinary."
         ),
         "body": (
-            "The current site is a lightweight FastAPI app that serves the generated content from SQLite and MinIO. "
-            "It preserves the original experiment and makes it available as a fast random wine generator."
+            "The original work used a character-level TensorFlow model for names, GPT-2-style PyTorch training for "
+            "descriptions, and StyleGAN-era image generation for labels. The current site is a lightweight FastAPI "
+            "app that serves the generated content from SQLite and MinIO so the old experiment remains online."
         ),
         "items": [
-            "Original model work lives in the linked this-wine-does-not-exist repository",
-            "The production app is this smaller wine-flask repository",
+            "Original model work: github.com/cipher982/this-wine-does-not-exist",
+            "Production app: github.com/cipher982/wine-flask",
             "Generated descriptions are stored in SQLite",
             "Generated bottle labels are stored in MinIO",
         ],
@@ -263,8 +264,7 @@ def get_seo_context(
         "page_description": description,
         "canonical_url": canonical_url,
         "site_url": SITE_URL,
-        "og_image": f"{SITE_URL}/image",
-        "current_year": date.today().year,
+        "og_image": f"{SITE_URL}/static/wine_logo_2.jpeg",
     }
 
 
