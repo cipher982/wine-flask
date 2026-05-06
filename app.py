@@ -32,11 +32,108 @@ DEFAULT_DESCRIPTION = (
     "Generate fictional wines with AI-created names, tasting notes, origins, and bottle labels from an old machine "
     "learning art project."
 )
-SITEMAP_PATHS = ["/"]
-
 WineRecord: TypeAlias = dict[str, str | int | float]
 BottleInfo: TypeAlias = tuple[int, str]
+SEOPage: TypeAlias = dict[str, str | list[str]]
 BOTTLE_LIST: list[BottleInfo] = []
+SEO_PAGES: dict[str, SEOPage] = {
+    "/ai-wine-generator": {
+        "title": "AI Wine Generator - This Wine Does Not Exist",
+        "description": "Use a random AI wine generator to create fictional wine names, tasting notes, origins, and bottle labels.",
+        "heading": "AI Wine Generator",
+        "intro": (
+            "This AI wine generator creates a new fictional bottle every time the page reloads. It combines older "
+            "machine learning models for wine names, descriptions, and label images into one fake wine page."
+        ),
+        "body": (
+            "The generated wines are not real products and are not meant as buying advice. They are synthetic wine "
+            "branding artifacts: plausible names, strange tasting notes, fake origins, and AI-created labels."
+        ),
+        "items": [
+            "Generate a fictional wine name and vintage",
+            "Pair it with a generated bottle label",
+            "Create a fake origin, category, and tasting note",
+            "Reload the generator for a new result",
+        ],
+    },
+    "/fake-wine-name-generator": {
+        "title": "Fake Wine Name Generator - This Wine Does Not Exist",
+        "description": "Generate strange fictional wine names from an old neural network wine project.",
+        "heading": "Fake Wine Name Generator",
+        "intro": (
+            "The original project trained character-level neural networks on wine names so the output feels close "
+            "to real wine branding while still being obviously synthetic."
+        ),
+        "body": (
+            "A fake wine name works best when it almost sounds like something from a cellar, catalog, or tasting "
+            "room. This site keeps that slightly broken quality instead of polishing every result into modern AI copy."
+        ),
+        "items": [
+            "Invented chateau and vineyard names",
+            "Synthetic vintages and bottle names",
+            "Category-aware pairings with generated labels",
+            "A deliberately odd old-internet generator style",
+        ],
+    },
+    "/ai-wine-label-generator": {
+        "title": "AI Wine Label Generator - This Wine Does Not Exist",
+        "description": "See AI-generated wine bottle labels from a StyleGAN-era generative art project.",
+        "heading": "AI Wine Label Generator",
+        "intro": (
+            "This project includes AI-generated wine bottle labels created as part of a StyleGAN-era experiment. "
+            "Each label is selected from the stored bottle image set and paired with generated wine text."
+        ),
+        "body": (
+            "The label generator is intentionally simple: it presents generated bottle art rather than trying to "
+            "build a professional design suite. The appeal is the weirdness of synthetic wine packaging."
+        ),
+        "items": [
+            "Generated bottle labels grouped by wine category",
+            "Direct HTTPS image URLs for fast loading",
+            "Fixed dimensions for stable page layout",
+            "Random pairing with generated names and tasting notes",
+        ],
+    },
+    "/wine-tasting-note-generator": {
+        "title": "Wine Tasting Note Generator - This Wine Does Not Exist",
+        "description": "Generate fictional wine descriptions and tasting notes from a GPT-2 wine text experiment.",
+        "heading": "Wine Tasting Note Generator",
+        "intro": (
+            "The wine descriptions come from a language model trained on a large set of wine text. The result is a "
+            "fictional tasting note that often has the rhythm of wine writing without describing a real bottle."
+        ),
+        "body": (
+            "The output can be funny, oddly specific, or almost believable. That is the point: a tasting note "
+            "generator is most interesting when it reveals the formula of wine description language."
+        ),
+        "items": [
+            "Generated tasting notes for fictional wines",
+            "Synthetic winery-style descriptions",
+            "Random category and origin details",
+            "A visible link back to the model/code history",
+        ],
+    },
+    "/about": {
+        "title": "About This Wine Does Not Exist",
+        "description": "Background on This Wine Does Not Exist, an older AI wine name, description, and label generation project.",
+        "heading": "About This Wine Does Not Exist",
+        "intro": (
+            "This Wine Does Not Exist is a small AI art project by David Rose. It started as a data collection and "
+            "model-training experiment using wine names, descriptions, and bottle label images."
+        ),
+        "body": (
+            "The current site is a lightweight FastAPI app that serves the generated content from SQLite and MinIO. "
+            "It preserves the original experiment and makes it available as a fast random wine generator."
+        ),
+        "items": [
+            "Original model work lives in the linked this-wine-does-not-exist repository",
+            "The production app is this smaller wine-flask repository",
+            "Generated descriptions are stored in SQLite",
+            "Generated bottle labels are stored in MinIO",
+        ],
+    },
+}
+SITEMAP_PATHS = ["/", *SEO_PAGES.keys()]
 
 
 class WineCategory(Enum):
@@ -261,6 +358,28 @@ def sitemap_xml():
 </urlset>
 """
     return Response(content=body, media_type="application/xml")
+
+
+@app.get("/ai-wine-generator", response_class=HTMLResponse)
+@app.get("/fake-wine-name-generator", response_class=HTMLResponse)
+@app.get("/ai-wine-label-generator", response_class=HTMLResponse)
+@app.get("/wine-tasting-note-generator", response_class=HTMLResponse)
+@app.get("/about", response_class=HTMLResponse)
+def seo_page(request: Request):
+    page = SEO_PAGES[request.url.path]
+    return templates.TemplateResponse(
+        "page.html",
+        {
+            "request": request,
+            "page": page,
+            **get_seo_context(
+                request.url.path,
+                title=str(page["title"]),
+                description=str(page["description"]),
+            ),
+            **get_umami_context(),
+        },
+    )
 
 
 @app.get("/", response_class=HTMLResponse)

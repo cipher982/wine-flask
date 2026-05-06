@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page_title }}</title>
+    <meta name="description" content="{{ page_description }}">
+    <link rel="canonical" href="{{ canonical_url }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="This Wine Does Not Exist">
+    <meta property="og:title" content="{{ page_title }}">
+    <meta property="og:description" content="{{ page_description }}">
+    <meta property="og:url" content="{{ canonical_url }}">
+    <meta property="og:image" content="{{ og_image }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ page_title }}">
+    <meta name="twitter:description" content="{{ page_description }}">
+    <meta name="twitter:image" content="{{ og_image }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', path='favicon.ico') }}">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": {{ page_title | tojson }},
+      "url": {{ canonical_url | tojson }},
+      "description": {{ page_description | tojson }},
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": {{ "This Wine Does Not Exist" | tojson }},
+        "url": {{ site_url | tojson }}
+      }
+    }
+    </script>
+    <style>
+      :root {
+        --win98-face: #C3C3C3;
+        --win98-shadow: #818181;
+        --win98-highlight: #FDFFFF;
+        --win98-accent: #000080;
+        --win98-text: #000000;
+      }
+
+      body {
+        font-family: "MS Sans Serif", "Tahoma", system-ui, sans-serif;
+        font-size: 11px;
+        background: #008080;
+        color: var(--win98-text);
+        margin: 0;
+        padding: 20px;
+        line-height: 1.4;
+        min-height: 100vh;
+        box-sizing: border-box;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: var(--win98-face);
+        border: 2px solid;
+        border-color: var(--win98-highlight) var(--win98-shadow) var(--win98-shadow) var(--win98-highlight);
+        padding: 15px;
+        box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      }
+
+      .title-bar {
+        background: linear-gradient(90deg, var(--win98-accent) 0%, #1084d0 100%);
+        color: white;
+        padding: 8px 12px;
+        font-weight: bold;
+        font-size: 12px;
+        border: 2px solid;
+        border-color: var(--win98-highlight) var(--win98-shadow) var(--win98-shadow) var(--win98-highlight);
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 16px;
+        margin: 0 0 10px 0;
+      }
+
+      h2 {
+        font-size: 14px;
+        margin: 20px 0 8px 0;
+      }
+
+      p {
+        margin: 8px 0;
+      }
+
+      ul {
+        margin: 8px 0 16px 18px;
+        padding: 0;
+      }
+
+      .panel {
+        border: 2px solid;
+        border-color: var(--win98-shadow) var(--win98-highlight) var(--win98-highlight) var(--win98-shadow);
+        background: var(--win98-face);
+        padding: 15px;
+        margin: 15px 0;
+      }
+
+      .nav {
+        border: 2px solid;
+        border-color: var(--win98-highlight) var(--win98-shadow) var(--win98-shadow) var(--win98-highlight);
+        padding: 10px;
+        margin-top: 15px;
+      }
+
+      a {
+        color: var(--win98-accent);
+        text-decoration: underline;
+      }
+
+      a:visited {
+        color: #800080;
+      }
+    </style>
+    {% if umami_enabled %}
+    <script defer src="{{ umami_script_url }}" data-website-id="{{ umami_website_id }}" data-domains="{{ umami_domains }}" data-tag="{{ umami_tag }}" data-performance="true"></script>
+    <script defer src="{{ umami_script_url | replace('script.js', 'recorder.js') }}" data-website-id="{{ umami_website_id }}" data-sample-rate="1" data-mask-level="moderate" data-max-duration="1800000"></script>
+    {% endif %}
+  </head>
+  <body>
+    <main class="container">
+      <div class="title-bar">This Wine Does Not Exist</div>
+      <section class="panel">
+        <h1>{{ page.heading }}</h1>
+        <p>{{ page.intro }}</p>
+        <p>{{ page.body }}</p>
+        <h2>What this page covers</h2>
+        <ul>
+          {% for item in page["items"] %}
+          <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+        <p><a href="/">Open the random wine generator</a></p>
+      </section>
+
+      <nav class="nav" aria-label="Related pages">
+        <a href="/">Home</a> |
+        <a href="/ai-wine-generator">AI wine generator</a> |
+        <a href="/fake-wine-name-generator">Fake wine name generator</a> |
+        <a href="/ai-wine-label-generator">AI wine label generator</a> |
+        <a href="/wine-tasting-note-generator">Wine tasting note generator</a> |
+        <a href="/about">About</a>
+      </nav>
+    </main>
+  </body>
+</html>
