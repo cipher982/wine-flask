@@ -32,6 +32,7 @@ DEFAULT_DESCRIPTION = (
     "Generate fictional wines with AI-created names, tasting notes, origins, and bottle labels from an old machine "
     "learning art project."
 )
+SITEMAP_PATHS = ["/"]
 
 WineRecord: TypeAlias = dict[str, str | int | float]
 BottleInfo: TypeAlias = tuple[int, str]
@@ -240,6 +241,26 @@ async def serve_image():
     This endpoint serves an image.
     """
     return FileResponse("./static/wine_logo_2.jpeg", media_type="image/jpeg")
+
+
+@app.get("/robots.txt", include_in_schema=False)
+def robots_txt():
+    body = f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n"
+    return Response(content=body, media_type="text/plain")
+
+
+@app.get("/sitemap.xml", include_in_schema=False)
+def sitemap_xml():
+    urls = "\n".join(
+        f"  <url><loc>{SITE_URL}{path}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>"
+        for path in SITEMAP_PATHS
+    )
+    body = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{urls}
+</urlset>
+"""
+    return Response(content=body, media_type="application/xml")
 
 
 @app.get("/", response_class=HTMLResponse)
