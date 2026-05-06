@@ -3,6 +3,7 @@ import os
 import random
 import sqlite3
 import sys
+from datetime import date
 from enum import Enum
 from pathlib import Path
 from typing import TypeAlias
@@ -25,6 +26,12 @@ load_dotenv()
 # Set constants
 MINIO_BUCKET = "wine-bottles"
 IMAGE_DIR = f"https://{os.environ.get('MINIO_ENDPOINT')}/{MINIO_BUCKET}/"
+SITE_URL = os.environ.get("SITE_URL", "https://thiswinedoesnotexist.com").rstrip("/")
+DEFAULT_TITLE = "This Wine Does Not Exist - AI Wine Generator"
+DEFAULT_DESCRIPTION = (
+    "Generate fictional wines with AI-created names, tasting notes, origins, and bottle labels from an old machine "
+    "learning art project."
+)
 
 WineRecord: TypeAlias = dict[str, str | int | float]
 BottleInfo: TypeAlias = tuple[int, str]
@@ -147,6 +154,22 @@ def get_umami_context() -> dict:
     }
 
 
+def get_seo_context(
+    path: str,
+    title: str = DEFAULT_TITLE,
+    description: str = DEFAULT_DESCRIPTION,
+) -> dict:
+    canonical_url = f"{SITE_URL}{path}"
+    return {
+        "page_title": title,
+        "page_description": description,
+        "canonical_url": canonical_url,
+        "site_url": SITE_URL,
+        "og_image": f"{SITE_URL}/image",
+        "current_year": date.today().year,
+    }
+
+
 def get_db_connection():
     """Get SQLite database connection."""
     try:
@@ -242,6 +265,7 @@ def main(request: Request):
             "w_origin": wine["origin"],
             "w_description": wine["description"],
             "w_image": image_path,
+            **get_seo_context("/"),
             **get_umami_context(),
         },
     )

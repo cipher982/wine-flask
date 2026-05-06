@@ -1,6 +1,37 @@
-<html>
+<!doctype html>
+<html lang="en">
   <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page_title }}</title>
+    <meta name="description" content="{{ page_description }}">
+    <link rel="canonical" href="{{ canonical_url }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="This Wine Does Not Exist">
+    <meta property="og:title" content="{{ page_title }}">
+    <meta property="og:description" content="{{ page_description }}">
+    <meta property="og:url" content="{{ canonical_url }}">
+    <meta property="og:image" content="{{ og_image }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ page_title }}">
+    <meta name="twitter:description" content="{{ page_description }}">
+    <meta name="twitter:image" content="{{ og_image }}">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', path='favicon.ico') }}">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": {{ "This Wine Does Not Exist" | tojson }},
+      "url": {{ site_url | tojson }},
+      "applicationCategory": {{ "EntertainmentApplication" | tojson }},
+      "operatingSystem": {{ "Web" | tojson }},
+      "description": {{ page_description | tojson }},
+      "creator": {
+        "@type": "Person",
+        "name": {{ "David Rose" | tojson }}
+      }
+    }
+    </script>
     <style>
       :root {
         --win98-face: #C3C3C3;
@@ -191,7 +222,7 @@
       </div>
 
       <div class="image-container">
-        <img src="{{ w_image }}" width="150" height="450" alt="Fake Bottle">
+        <img src="{{ w_image }}" width="150" height="450" alt="AI-generated wine bottle label for {{ w_name }}">
       </div>
 
       <div class="description">{{ w_description }}</div>
