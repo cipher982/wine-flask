@@ -151,6 +151,29 @@
         line-height: 1.4;
       }
 
+      .seo-copy {
+        border: 2px solid;
+        border-color: var(--win98-shadow) var(--win98-highlight) var(--win98-highlight) var(--win98-shadow);
+        background: var(--win98-face);
+        padding: 15px;
+        margin: 15px 0;
+      }
+
+      .seo-copy h2,
+      .seo-copy h3 {
+        text-align: left;
+        padding: 0;
+      }
+
+      .seo-copy p {
+        margin: 8px 0;
+      }
+
+      .seo-copy ul {
+        margin: 8px 0 8px 18px;
+        padding: 0;
+      }
+
       .image-container {
         text-align: center;
         margin: 20px 0;
@@ -226,6 +249,36 @@
       </div>
 
       <div class="description">{{ w_description }}</div>
+
+      <section class="seo-copy">
+        <h2>AI Wine Generator</h2>
+        <p>
+          This Wine Does Not Exist is a small generative art project that creates fictional wines from machine
+          learning models trained on wine names, descriptions, and bottle labels. Each page load pairs an
+          AI-generated label with a generated wine name, origin, category, and tasting note.
+        </p>
+        <p>
+          The project is not a real wine shop or recommendation engine. It is an experiment in fake wine branding:
+          part random wine generator, part AI wine label generator, and part archive of older neural-network art.
+        </p>
+
+        <h3>What gets generated?</h3>
+        <ul>
+          <li>Fictional wine names and vintages</li>
+          <li>Generated tasting notes and wine descriptions</li>
+          <li>AI-created bottle labels grouped by wine category</li>
+          <li>Fake origins, categories, and winery-style details</li>
+        </ul>
+
+        <h3>More pages</h3>
+        <ul>
+          <li><a href="/ai-wine-generator">AI wine generator</a></li>
+          <li><a href="/fake-wine-name-generator">Fake wine name generator</a></li>
+          <li><a href="/ai-wine-label-generator">AI wine label generator</a></li>
+          <li><a href="/wine-tasting-note-generator">Wine tasting note generator</a></li>
+          <li><a href="/about">About this project</a></li>
+        </ul>
+      </section>
 
       <footer>
         <p>Created by: David Rose</p>
