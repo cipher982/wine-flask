@@ -18,7 +18,11 @@ The deployed site uses `wine-flask/`. Always `cd` into it for git operations.
 - Both stored in MinIO on clifford, backed up to Bremen NAS
 
 **Deployment:**
-- Single container on clifford via Coolify
+- Single container on clifford, **estate manual-app** (app `wine-manual`, container `wine-manual`, internal port 8000)
+- Deploy:
+  ```bash
+  ~/git/me/domains/mytech/bin/manual-app deploy wine-manual --repo-dir /Users/davidrose/git/wine/wine-flask
+  ```
 - Database downloads from MinIO on startup
 - No separate database container needed
 
