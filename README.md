@@ -1,4 +1,4 @@
-# Wine-Flask
+# Wine
 Hosting repo for https://github.com/cipher982/this-wine-does-not-exist
 
 The linked repository above contains all the code and notebooks for building the dataset of wines, training the various models, and producing the results. This repository is built around providing a web server built around Python that allows the work to be presented on a wider scale.
@@ -8,7 +8,7 @@ www.thiswinedoesnotexist.com
 
 ### Architecture
 
-**Application:** FastAPI web server serving AI-generated wine content
+**Application:** FastAPI web server serving AI-generated wine content (performance-oriented framework, not Flask)
 
 **Data Storage:**
 - **Wine Descriptions:** SQLite database (5.3 MB, 9,483 records) stored in MinIO bucket `wine-data/wine_data.db`

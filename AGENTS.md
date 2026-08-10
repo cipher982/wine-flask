@@ -1,10 +1,10 @@
-# Wine Flask - thiswinedoesnotexist.com
+# Wine - thiswinedoesnotexist.com
 
 ## Nested Repository Structure
 
 **Note:** `~/git/wine/` contains two separate repositories:
 - `~/git/wine/this-wine-does-not-exist/` - Original implementation
-- `~/git/wine/wine-flask/` - Current deployed version (Flask/FastAPI)
+- `~/git/wine/wine-flask/` - Current deployed version (FastAPI)
 
 The deployed site uses `wine-flask/`. Always `cd` into it for git operations.
 
