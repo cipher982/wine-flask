@@ -213,8 +213,17 @@ def download_database_from_minio():
         raise
 
 
+def _docs_enabled() -> bool:
+    return os.getenv("ENABLE_API_DOCS", "").strip().lower() in {"1", "true", "yes"}
+
+
 # Initialize FastAPI app
-app = FastAPI()
+_docs_on = _docs_enabled()
+app = FastAPI(
+    docs_url="/docs" if _docs_on else None,
+    redoc_url="/redoc" if _docs_on else None,
+    openapi_url="/openapi.json" if _docs_on else None,
+)
 
 
 # Download database on startup
@@ -413,27 +422,27 @@ def main(request: Request):
 
 @app.get("/health", status_code=status.HTTP_200_OK)
 async def health_check():
-    health_status = {"database": "unhealthy", "minio": "unhealthy"}
+    health_status = {"database": "unhealthy", "bottles": "unhealthy"}
 
     # Check database connection
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("SELECT 1")
-        conn.close()
         health_status["database"] = "healthy"
     except Exception as e:
         LOG.error(f"Database health check failed: {e}")
+    finally:
+        if conn is not None:
+            conn.close()
 
-    # Check MinIO connection
-    try:
-        minio_client = get_minio_client()
-        minio_client.list_buckets()
-        health_status["minio"] = "healthy"
-    except Exception as e:
-        LOG.error(f"MinIO health check failed: {e}")
-
-    if all(status == "healthy" for status in health_status.values()):
-        return health_status
+    # Verify bottle labels are loaded in memory instead of listing all S3 buckets
+    if len(BOTTLE_LIST) > 0:
+        health_status["bottles"] = "healthy"
     else:
-        raise HTTPException(status_code=503, detail=health_status)
+        LOG.error("Bottle list health check failed: BOTTLE_LIST is empty")
+
+    if all(check == "healthy" for check in health_status.values()):
+        return health_status
+    raise HTTPException(status_code=503, detail={"status": "unhealthy", "checks": health_status})
